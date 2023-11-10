@@ -9,7 +9,7 @@ if (NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 20)
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fprofile-arcs -ftest-coverage")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fprofile-arcs -ftest-coverage -O")
 
 # strongly encouraged to enable this globally to avoid conflicts between
 # -Wpedantic being enabled and -std=c++20 and -std=gnu++20 for example
@@ -18,7 +18,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set the project name and language
 project(
-  myproject
+  patatocs
   VERSION 0.0.1
   DESCRIPTION ""
   HOMEPAGE_URL "%%myurl%%"
@@ -28,13 +28,13 @@ include(cmake/PreventInSourceBuilds.cmake)
 include(ProjectOptions.cmake)
 
 
-myproject_setup_options()
+patatocs_setup_options()
 
-myproject_global_options()
+patatocs_global_options()
 include(Dependencies.cmake)
-myproject_setup_dependencies()
+patatocs_setup_dependencies()
 
-myproject_local_options()
+patatocs_local_options()
 
 # don't know if this should be set globally from here or not...
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -48,12 +48,26 @@ string(
             8
             GIT_SHORT_SHA)
 
-target_compile_features(myproject_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+target_compile_features(patatocs_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
-add_library(myproject::myproject_options ALIAS myproject_options)
-add_library(myproject::myproject_warnings ALIAS myproject_warnings)
+add_library(patatocs::patatocs_options ALIAS patatocs_options)
+add_library(patatocs::patatocs_warnings ALIAS patatocs_warnings)
 
 # configure files based on CMake configuration options
+
+add_library(${PROJECT_NAME} STATIC)
+
+target_link_libraries(${PROJECT_NAME}
+        PUBLIC patatocs::patatocs_options
+            patatocs::patatocs_warnings
+        )
+
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "../"
+    LIBRARY_OUTPUT_DIRECTORY "../"
+    ARCHIVE_OUTPUT_DIRECTORY "../"
+)
 
 # Adding the src:
 add_subdirectory(src)
@@ -90,11 +104,11 @@ include(cmake/PackageProject.cmake)
 
 # Add other targets that you want installed here, by default we just package the one executable
 # we know we want to ship
-myproject_package_project(
+patatocs_package_project(
   TARGETS
-        myproject1
-  myproject_options
-  myproject_warnings
+        patatocs1
+  patatocs_options
+  patatocs_warnings
   # FIXME: this does not work! CK
   # PRIVATE_DEPENDENCIES_CONFIGURED project_options project_warnings
 )

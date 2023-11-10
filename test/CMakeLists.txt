@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.15...3.23)
 
 project(CmakeConfigPackageTests LANGUAGES CXX)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fprofile-arcs -ftest-coverage")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fprofile-arcs -ftest-coverage -O")
 
 # ---- Test as standalone project the exported config package ----
 
 if(PROJECT_IS_TOP_LEVEL OR TEST_INSTALLED_VERSION)
   enable_testing()
 
-  find_package(myproject CONFIG REQUIRED) # for intro, project_options, ...
+  find_package(patatocs CONFIG REQUIRED) # for intro, project_options, ...
 
-  if(NOT TARGET myproject_options)
+  if(NOT TARGET patatocs_options)
     message(FATAL_ERROR "Requiered config package not found!")
     return() # be strictly paranoid for Template Janitor github action! CK
   endif()
@@ -30,8 +30,8 @@ add_executable(tests
         )
 target_link_libraries(
   tests
-  PRIVATE myproject::myproject_warnings
-          myproject::myproject_options
+  PRIVATE patatocs::patatocs_warnings
+          patatocs::patatocs_options
           Catch2::Catch2WithMain)
 
 if(WIN32 AND BUILD_SHARED_LIBS)

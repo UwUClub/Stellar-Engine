@@ -6,7 +6,7 @@ include(cmake/CPM.cmake)
 
 find_package(Catch2 QUIET)
 
-function(myproject_setup_dependencies)
+function(patatocs_setup_dependencies)
 
   # For each dependency, see if it's
   # already been provided to us by a parent project
