@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15...3.23)
 
 project(CmakeConfigPackageTests LANGUAGES CXX)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fprofile-arcs -ftest-coverage -O")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O")
 
 # ---- Test as standalone project the exported config package ----
 
@@ -26,7 +26,6 @@ endif ()
 
 add_executable(tests
         tests.cpp
-        ../src/factorial.cpp
         )
 target_link_libraries(
   tests

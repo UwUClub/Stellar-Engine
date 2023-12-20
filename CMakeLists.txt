@@ -55,7 +55,7 @@ add_library(patatocs::patatocs_warnings ALIAS patatocs_warnings)
 
 # configure files based on CMake configuration options
 
-add_library(${PROJECT_NAME} STATIC)
+add_executable(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC patatocs::patatocs_options
@@ -106,7 +106,7 @@ include(cmake/PackageProject.cmake)
 # we know we want to ship
 patatocs_package_project(
   TARGETS
-        patatocs1
+        patatocs
   patatocs_options
   patatocs_warnings
   # FIXME: this does not work! CK

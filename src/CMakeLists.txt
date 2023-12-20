@@ -4,7 +4,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O")
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-    World.cpp
+    SparseArray.hpp
+    Logger.hpp
+    Main.cpp
         )
 
 include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -5,6 +5,9 @@ cmake-build-*/
 conan-cache/
 CMakeCache.txt
 .cache
+libpatat*
+patat*
+log.txt
 
 # User spesific settings
 CMakeUserPresets.json
