@@ -8,161 +8,231 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include "Exception.hpp"
 
-template<typename Component>
-class SparseArray
-{
-    public:
-        using compRef = Component &;
-        using optComponent = std::optional<Component>;
-        using optCompRef = optComponent &;
-        using vectArray = std::vector<optComponent>;
-        using vectIndex = vectArray::size_type;
-        using iterator = typename vectArray::iterator;
-        using constIterator = typename vectArray::const_iterator;
+namespace Engine {
 
-    private:
-        vectArray _array;
+    DEFINE_EXCEPTION(SparseArrayException);
+    DEFINE_EXCEPTION_FROM(SparseArrayExceptionOutOfRange, SparseArrayException);
+    DEFINE_EXCEPTION_FROM(SparseArrayExceptionEmpty, SparseArrayException);
 
-    public:
-        SparseArray() = default;
-        ~SparseArray() = default;
+    /**
+     * @brief SparseArray is a class that store a vector of optional of a given type
+     * It represents a ONE component type, each index in the array represent the component of the entity at the same
+     * index
+     *
+     * @tparam Component The type of the components to store
+     */
+    template<typename Component>
+    class SparseArray final
+    {
+        public:
+            using compRef = Component &;
+            using constCompRef = const Component &;
+            using optComponent = std::optional<Component>;
+            using optCompRef = optComponent &;
+            using vectArray = std::vector<optComponent>;
+            using vectIndex = vectArray::size_type;
+            using iterator = typename vectArray::iterator;
+            using constIterator = typename vectArray::const_iterator;
 
-        SparseArray(const SparseArray &other) = default;
-        SparseArray &operator=(const SparseArray &other) = default;
+        private:
+            vectArray _array;
 
-        SparseArray(SparseArray &&other) noexcept = default;
-        SparseArray &operator=(SparseArray &&other) noexcept = default;
+        public:
+#pragma region constructors / destructors
+            SparseArray() = default;
+            ~SparseArray() = default;
 
-        compRef operator[](vectIndex index)
-        {
-            if (index >= _array.size() || index < 0) {
-                throw SparseArrayException("index out of range: " + std::to_string(index));
+            SparseArray(const SparseArray &other) = default;
+            SparseArray &operator=(const SparseArray &other) = default;
+
+            SparseArray(SparseArray &&other) noexcept = default;
+            SparseArray &operator=(SparseArray &&other) noexcept = default;
+#pragma endregion constructors / destructors
+
+#pragma region operators
+
+            /**
+             * @brief Get the component at the given index
+             * @throw SparseArrayExceptionOutOfRange if the index is out of range or if the index is empty
+             * @throw SparseArrayExceptionEmpty if the component is empty
+             * @param index The index to get
+             * @return compRef The component at the given index
+             */
+            compRef operator[](vectIndex aIndex)
+            {
+                if (aIndex >= _array.size() || aIndex < 0) {
+                    throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
+                }
+                if (!_array[aIndex].has_value()) {
+                    throw SparseArrayExceptionEmpty("index is empty: " + std::to_string(aIndex));
+                }
+                return _array[aIndex].value();
             }
-            if (!_array[index].has_value()) {
-                throw SparseArrayException("index is empty: " + std::to_string(index));
+
+            /**
+             * @brief Get the component at the given index
+             * @throw SparseArrayExceptionOutOfRange if the index is out of range or if the index is empty
+             * @throw SparseArrayExceptionEmpty if the component is empty
+             * @param index The index to get
+             * @return compRef The component at the given index
+             */
+            constCompRef operator[](vectIndex aIndex) const
+            {
+                if (aIndex >= _array.size() || aIndex < 0) {
+                    throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
+                }
+                if (!_array[aIndex].has_value()) {
+                    throw SparseArrayExceptionEmpty("index is empty: " + std::to_string(aIndex));
+                }
+                return _array[aIndex].value();
             }
-            return _array[index].value();
-        }
+
+#pragma endregion operators
 
 #pragma region methods
 
-        compRef get(vectIndex index) const
-        {
-            if (index >= _array.size() || index < 0) {
-                throw SparseArrayException("index out of range: " + std::to_string(index));
+            /**
+             * @brief Get the component at the given index
+             * @throw SparseArrayExceptionOutOfRange if the index is out of range or if the index is empty
+             * @throw SparseArrayExceptionEmpty if the component is empty
+             * @param index The index to get
+             * @return compRef The component at the given index
+             */
+            compRef get(vectIndex aIndex)
+            {
+                if (aIndex >= _array.size() || aIndex < 0) {
+                    throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
+                }
+                if (!_array[aIndex].has_value()) {
+                    throw SparseArrayExceptionEmpty("index is empty: " + std::to_string(aIndex));
+                }
+                return _array[aIndex].value();
             }
-            if (!_array[index].has_value()) {
-                throw SparseArrayException("index is empty: " + std::to_string(index));
-            }
-            return _array[index].value();
-        }
 
-        void set(vectIndex index, Component &&value)
-        {
-            if (index >= _array.size() || index < 0) {
-                throw SparseArrayException("index out of range: " + std::to_string(index));
+            /**
+             * @brief Set the component at the given index
+             * @throw SparseArrayExceptionOutOfRange if the index is out of range
+             * @param index The index to set
+             * @param value The value to set
+             */
+            void set(vectIndex aIndex, Component &&aValue)
+            {
+                if (aIndex >= _array.size() || aIndex < 0) {
+                    throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
+                }
+                _array[aIndex] = std::move(aValue);
             }
-            _array[index] = std::move(value);
-        }
 
-        void init(vectIndex index, optComponent value = std::nullopt)
-        {
-            if (index >= _array.size()) {
-                _array.resize(index + 1, value);
+            /**
+             * @brief Check if the component at the given index is set
+             * @throw SparseArrayExceptionOutOfRange if the index is out of range
+             * @param index The index to check
+             * @return true if the component is set
+             * @return false if the component is not set
+             */
+            bool has(vectIndex aIndex) const
+            {
+                if (aIndex >= _array.size() || aIndex < 0) {
+                    throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
+                }
+                return _array[aIndex].has_value();
             }
-            _array[index] = value;
-        }
 
-        template<typename... Args>
-        compRef emplace(vectIndex index, Args &&...args)
-        {
-            if (index >= _array.size()) {
-                _array.resize(index + 1);
+            /**
+             * @brief Init the component at the given index, will resize the array if needed and set each value to
+             * std::nullopt
+             * @param index The index to set
+             */
+            void init(vectIndex aIndex)
+            {
+                if (aIndex >= _array.size()) {
+                    _array.resize(aIndex + 1, std::nullopt);
+                }
+                _array[aIndex] = std::nullopt;
             }
-            _array[index].emplace(Component(std::forward<Args>(args)...));
-            return _array[index].value();
-        }
 
-        void erase(vectIndex index)
-        {
-            if (index >= _array.size() || index < 0) {
-                throw SparseArrayException("index out of range: " + std::to_string(index));
+            /**
+             * @brief Emplace the component at the given index, will resize the array if needed and set each value to
+             * std::nullopt
+             * @param index The index to set
+             * @param args The arguments to emplace
+             * @return compRef The component at the given index (should be the one inserted)
+             */
+            template<typename... Args>
+            compRef emplace(vectIndex aIndex, Args &&...aArgs)
+            {
+                if (aIndex >= _array.size()) {
+                    _array.resize(aIndex + 1);
+                }
+                _array[aIndex].emplace(Component(std::forward<Args>(aArgs)...));
+                return _array[aIndex].value();
             }
-            _array[index].reset();
-        }
+
+            /**
+             * @brief Erase the component at the given index, will change the value of the component to std::nullopt,
+             * won't resize the array
+             * @throw SparseArrayExceptionOutOfRange if the index is out of range
+             * @param index The index to erase
+             */
+            void erase(vectIndex aIndex)
+            {
+                if (aIndex >= _array.size() || aIndex < 0) {
+                    throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
+                }
+                _array[aIndex].reset();
+            }
+
+            /**
+             * @brief Destroy all the components
+             */
+            void clear()
+            {
+                _array.clear();
+            }
 
 #pragma endregion methods
 
 #pragma region iterator
 
-        iterator begin()
-        {
-            return _array.begin();
-        }
+            iterator begin()
+            {
+                return _array.begin();
+            }
 
-        iterator end()
-        {
-            return _array.end();
-        }
+            iterator end()
+            {
+                return _array.end();
+            }
 
-        constIterator begin() const
-        {
-            return _array.begin();
-        }
+            constIterator begin() const
+            {
+                return _array.begin();
+            }
 
-        constIterator end() const
-        {
-            return _array.end();
-        }
+            constIterator end() const
+            {
+                return _array.end();
+            }
 
-        constIterator cbegin() const
-        {
-            return _array.cbegin();
-        }
+            constIterator cbegin() const
+            {
+                return _array.cbegin();
+            }
 
-        constIterator cend() const
-        {
-            return _array.cend();
-        }
+            constIterator cend() const
+            {
+                return _array.cend();
+            }
 
-        vectIndex size() const
-        {
-            return _array.size();
-        }
+            vectIndex size() const
+            {
+                return _array.size();
+            }
 
 #pragma endregion iterator
-
-        void clear()
-        {
-            _array.clear();
-        }
-
-    private:
-        class SparseArrayException final : public std::exception
-        {
-            public:
-                explicit SparseArrayException(const std::string &aMessage)
-                {
-                    _message += aMessage;
-                }
-
-                ~SparseArrayException() final = default;
-
-                SparseArrayException(const SparseArrayException &other) = default;
-                SparseArrayException &operator=(const SparseArrayException &other) = default;
-
-                SparseArrayException(SparseArrayException &&other) noexcept = default;
-                SparseArrayException &operator=(SparseArrayException &&other) noexcept = default;
-
-                [[nodiscard]] const char *what() const noexcept override
-                {
-                    return _message.c_str();
-                }
-
-            private:
-                std::string _message {"SparseArrayException: "};
-        };
-};
+    };
+} // namespace Engine
 
 #endif /* !SPARSEARRAY_HPP_ */
