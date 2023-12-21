@@ -27,7 +27,6 @@ project(
 include(cmake/PreventInSourceBuilds.cmake)
 include(ProjectOptions.cmake)
 
-
 patatocs_setup_options()
 
 patatocs_global_options()
