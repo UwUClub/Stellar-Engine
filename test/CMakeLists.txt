@@ -26,12 +26,15 @@ endif ()
 
 add_executable(tests
         tests.cpp
-        )
+ )
+
 target_link_libraries(
   tests
   PRIVATE patatocs::patatocs_warnings
           patatocs::patatocs_options
-          Catch2::Catch2WithMain)
+          Catch2::Catch2WithMain
+          patatocs
+          )
 
 if(WIN32 AND BUILD_SHARED_LIBS)
   add_custom_command(
@@ -41,7 +44,7 @@ if(WIN32 AND BUILD_SHARED_LIBS)
     COMMAND_EXPAND_LISTS)
 endif()
 
-target_include_directories(tests PRIVATE ../src)
+target_include_directories(tests PRIVATE ../includes)
 
 # automatically discover tests that are defined in catch based test files you can modify the unittests. Set TEST_PREFIX
 # to whatever you want, or use different for different binaries

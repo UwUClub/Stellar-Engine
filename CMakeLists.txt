@@ -54,7 +54,7 @@ add_library(patatocs::patatocs_warnings ALIAS patatocs_warnings)
 
 # configure files based on CMake configuration options
 
-add_executable(${PROJECT_NAME})
+add_library(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
         PUBLIC patatocs::patatocs_options
@@ -70,6 +70,7 @@ set_target_properties(${PROJECT_NAME}
 
 # Adding the src:
 add_subdirectory(src)
+add_subdirectory(includes)
 
 # Don't even look at tests if we're not top level
 if(NOT PROJECT_IS_TOP_LEVEL)

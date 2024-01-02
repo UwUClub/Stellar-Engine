@@ -10,7 +10,7 @@
 #include <vector>
 #include "Exception.hpp"
 
-namespace Engine {
+namespace Engine::Core {
 
     DEFINE_EXCEPTION(SparseArrayException);
     DEFINE_EXCEPTION_FROM(SparseArrayExceptionOutOfRange, SparseArrayException);
@@ -233,6 +233,6 @@ namespace Engine {
 
 #pragma endregion iterator
     };
-} // namespace Engine
+} // namespace Engine::Core
 
 #endif /* !SPARSEARRAY_HPP_ */

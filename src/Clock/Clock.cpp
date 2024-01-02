@@ -1,9 +1,11 @@
 #include "Clock.hpp"
 
 namespace Engine {
+    const constexpr int time = 1000;
+
     double Clock::getElapsedTime() const
     {
-        return _delta.count() * 1000;
+        return _delta.count() * time;
     }
 
     double Clock::restart()

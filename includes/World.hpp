@@ -13,7 +13,7 @@
 #include "SparseArray.hpp"
 #include <boost/container/flat_map.hpp>
 
-namespace Engine {
+namespace Engine::Core {
     DEFINE_EXCEPTION(WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentAlreadyRegistered, WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentNotRegistered, WorldException);
@@ -28,11 +28,12 @@ namespace Engine {
     class World
     {
         public:
-            using containerFunc = std::function<void(World &, const std::size_t &)>;
+            using id = std::size_t;
+            using containerFunc = std::function<void(World &, const id &)>;
             using container = std::pair<std::any, std::tuple<containerFunc, containerFunc>>;
             using containerMap = boost::container::flat_map<std::type_index, container>;
-            using idsContainer = std::vector<std::size_t>;
-            using systemFunc = std::function<void(World &, double deltaTime, std::size_t)>;
+            using idsContainer = std::vector<id>;
+            using systemFunc = std::function<void(World &, double deltaTime, id)>;
             using systems = boost::container::flat_map<std::string, systemFunc>;
 
         protected:
@@ -306,6 +307,6 @@ namespace Engine {
 
 #pragma endregion methods
     };
-} // namespace Engine
+} // namespace Engine::Core
 
 #endif /* !WORLD_HPP_ */

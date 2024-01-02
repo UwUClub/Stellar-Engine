@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 
-namespace Engine {
+namespace Engine::Core {
     std::size_t World::createEntity()
     {
         std::size_t newIdx = 0;
@@ -59,4 +59,4 @@ namespace Engine {
     {
         _clock.restart();
     }
-} // namespace Engine
+} // namespace Engine::Core

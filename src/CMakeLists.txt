@@ -6,11 +6,7 @@ add_subdirectory(Clock)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-    Main.cpp
     World.cpp
-        )
+)
 
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32> ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32> ${Boost_LIBRARIES})
