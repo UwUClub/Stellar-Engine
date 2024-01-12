@@ -2,7 +2,7 @@
 
 # get package manager
 if [ -x "$(command -v apt-get)" ]; then
-    sudo apt-get install -y libboost-all-dev libspdlog-dev libcatch2-dev
+    sudo apt-get install -y libboost-all-dev libspdlog-dev catch2
 elif [ -x "$(command -v pacman)" ]; then
     sudo pacman -S --noconfirm git boost spdlog catch2
 else
