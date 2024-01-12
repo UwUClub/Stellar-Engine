@@ -4,15 +4,15 @@
 #include <any>
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <tuple>
 #include <typeindex>
 #include <utility>
 #include <vector>
-#include "Clock.hpp"
 #include "Exception.hpp"
 #include "SparseArray.hpp"
+#include "Systems/System.hpp"
 #include <boost/container/flat_map.hpp>
-
 namespace Engine::Core {
     DEFINE_EXCEPTION(WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentAlreadyRegistered, WorldException);
@@ -33,15 +33,38 @@ namespace Engine::Core {
             using container = std::pair<std::any, std::tuple<containerFunc, containerFunc>>;
             using containerMap = boost::container::flat_map<std::type_index, container>;
             using idsContainer = std::vector<id>;
-            using systemFunc = std::function<void(World &, double deltaTime, id)>;
-            using systemTimed = std::pair<systemFunc, Clock>;
-            using systems = boost::container::flat_map<std::string, systemTimed>;
+            using systemFunc = std::unique_ptr<System>;
+            using newSystemFunc = std::pair<std::string, std::unique_ptr<System>>;
+            using systems = boost::container::flat_map<std::string, systemFunc>;
 
         protected:
             containerMap _components;
             idsContainer _ids;
             std::size_t _nextId = 0;
             systems _systems;
+
+            template<typename... Components>
+            class Query
+            {
+                public:
+                    explicit Query(Core::World &world)
+                        : _world(world)
+                    {}
+
+                    void
+                    forEach(double deltaTime,
+                            std::function<void(World &world, double deltaTime, std::size_t idx, Components &...)> func)
+                    {
+                        for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
+                            if (_world.get().hasComponents<Components...>(idx)) {
+                                func(_world.get(), deltaTime, idx, _world.get().getComponent<Components>().get(idx)...);
+                            }
+                        }
+                    }
+
+                private:
+                    std::reference_wrapper<Core::World> _world;
+            };
 
         public:
 #pragma region constructors / destructors
@@ -56,6 +79,12 @@ namespace Engine::Core {
 #pragma endregion constructors / destructors
 
 #pragma region methods
+
+            template<typename... Components>
+            Query<Components...> query()
+            {
+                return Query<Components...>(*this);
+            }
 
             /**
              * @brief Add a component to the World
@@ -84,6 +113,17 @@ namespace Engine::Core {
                                                                 myComponent.erase(aIdx);
                                                             }));
                 return std::any_cast<SparseArray<Component> &>(_components[typeIndex].first);
+            }
+
+            /**
+             * @brief Add multiple components to the World
+             *
+             * @tparam Components The components to add
+             */
+            template<typename... Components>
+            void registerComponents()
+            {
+                (registerComponent<Components>(), ...);
             }
 
             /**
@@ -118,6 +158,20 @@ namespace Engine::Core {
                     throw WorldExceptionComponentNotRegistered("Component not registered");
                 }
                 return std::any_cast<SparseArray<Component> const &>(_components.at(typeIndex).first);
+            }
+
+            /**
+             * @brief Check if the entity has all the components
+             *
+             * @tparam Components The components to check
+             * @param aIndex The index of the entity
+             * @return true if the entity has all the components
+             * @return false if the entity doesn't have all the components
+             */
+            template<typename... Components>
+            [[nodiscard]] bool hasComponents(std::size_t aIndex) const
+            {
+                return (... && getComponent<Components>().has(aIndex));
             }
 
             /**
@@ -212,33 +266,19 @@ namespace Engine::Core {
             std::size_t createEntity();
 
             /**
-             * @brief Initialize some parts of the world such as the clock before the main loop
-             *
-             */
-            void init();
-
-            /**
              * @brief Add a system to the world
              *
              * @tparam Components The components the system will use
              * @tparam Function The type of the system (infered)
              * @param aFunction The system to add
              */
-            template<typename... Components, typename Function>
-            void addSystem(Function &&aFunction)
+            void addSystem(newSystemFunc &aSystem)
             {
-                std::string aName = typeid(Function).name();
-                auto func = std::forward<Function>(aFunction);
-
-                if (_systems.find(aName) != _systems.end()) {
+                if (_systems.find(aSystem.first) != _systems.end()) {
                     throw WorldExceptionSystemAlreadyRegistered("System already registered");
                 }
 
-                _systems[aName] = std::make_pair(
-                    [this, func](World &aWorld, double deltaTime, std::size_t aIndex) {
-                        callSystem<Components...>(func, aIndex, aWorld, deltaTime);
-                    },
-                    Clock());
+                _systems[aSystem.first] = std::move(aSystem.second);
             }
 
             /**
@@ -247,16 +287,13 @@ namespace Engine::Core {
              * @tparam Function The type of the system (infered)
              * @param aFunction The system to remove
              */
-            template<typename Function>
-            void removeSystem(Function & /*aFunction*/)
+            void removeSystem(std::string &aFuncName)
             {
-                std::string aName = typeid(Function).name();
-
-                if (_systems.find(aName) == _systems.end()) {
+                if (_systems.find(aFuncName) == _systems.end()) {
                     throw WorldExceptionSystemNotRegistered("System not registered");
                 }
 
-                _systems.erase(aName);
+                _systems.erase(aFuncName);
             }
 
             /**
@@ -264,6 +301,13 @@ namespace Engine::Core {
              *
              */
             void runSystems();
+
+            /**
+             * @brief Get the Current Id object
+             *
+             * @return std::size_t The current id
+             */
+            [[nodiscard]] std::size_t getCurrentId() const;
 
         protected:
             /**
@@ -287,26 +331,6 @@ namespace Engine::Core {
             {
                 return std::get<1>(_components[aTypeIndex].second);
             }
-
-            /**
-             * @brief Call a system
-             *
-             * @tparam Components The components the system will use
-             * @tparam Function The type of the system (infered)
-             * @param aFunction The system to call
-             * @param aIndex The index of the entity
-             * @param aWorld The world
-             * @param deltaTime The time elapsed since the last call
-             */
-            template<typename... Components, typename Function>
-            void callSystem(Function &&aFunction, std::size_t aIndex, World &aWorld, double deltaTime)
-            {
-                if (!(... && getComponent<Components>().has(aIndex))) {
-                    return;
-                }
-                std::forward<Function>(aFunction)(aWorld, deltaTime, aIndex, getComponent<Components>().get(aIndex)...);
-            }
-
 #pragma endregion methods
     };
 } // namespace Engine::Core

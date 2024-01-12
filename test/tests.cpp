@@ -1,5 +1,11 @@
 #include <cstddef>
-#include "Core/SparseArray.hpp"
+#include <cstdio>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include "Core/Systems/GenericSystem.hpp"
+#include "Core/Systems/System.hpp"
+#include "Core/World.hpp"
 #include "ECS.hpp"
 #include <catch2/catch_test_macros.hpp>
 
@@ -53,18 +59,65 @@ struct hp1
 
 struct hp2
 {
-        int hp;
+        int maxHp;
 };
 
-void takeDamage(Engine::Core::World & /*world*/, double /*delta*/, std::size_t /*idx*/, hp1 &hp1, hp2 &hp2)
+template<typename... Components>
+class MySystemClass : public Engine::Core::System
 {
-    hp1.hp -= 1;
-    hp2.hp -= 2;
-}
+    public:
+        explicit MySystemClass(Engine::Core::World &world)
+            : Engine::Core::System(),
+              _world(world)
+        {}
+
+        MySystemClass(const MySystemClass &) = default;
+        MySystemClass(MySystemClass &&) = default;
+
+        MySystemClass &operator=(const MySystemClass &) = default;
+        MySystemClass &operator=(MySystemClass &&) = default;
+
+        void update() override
+        {
+            _world.get().query<Components...>().forEach(
+                _clock.getElapsedTime(), [this](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t idx,
+                                                Components &...components) {
+                    this->updateSystem(_world.get(), _clock.getElapsedTime(), idx, components...);
+                });
+            _clock.restart();
+        }
+
+    private:
+        std::reference_wrapper<Engine::Core::World> _world;
+        Engine::Clock _clock;
+
+        void updateSystem(Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t idx, hp1 &hp1Comp,
+                          hp2 &hp2Comp)
+        {
+            std::cout << "Update system class"
+                      << "\n";
+            hp1Comp.hp--;
+            std::cout << hp1Comp.hp << '\n';
+            hp2Comp.maxHp -= 2;
+            std::cout << hp2Comp.maxHp << '\n';
+            std::cout << "Idx " << idx << "\n";
+        }
+};
 
 TEST_CASE("World", "[World]")
 {
     Engine::Core::World world;
+    auto MySystem = Engine::Core::createSystem<hp1, hp2>(
+        world, "MySystem",
+        [](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t idx, hp1 &cop1, hp2 &cop2) {
+            std::cout << "Update system"
+                      << "\n";
+            cop1.hp--;
+            std::cout << cop1.hp << "\n";
+            cop2.maxHp -= 2;
+            std::cout << cop2.maxHp << "\n";
+            std::cout << "Idx " << idx << "\n";
+        });
 
     SECTION("Create an entity")
     {
@@ -89,14 +142,38 @@ TEST_CASE("World", "[World]")
 
         world.registerComponent<hp1>();
         world.registerComponent<hp2>();
-        world.addSystem<hp1, hp2>(takeDamage);
+        world.addSystem(MySystem);
 
         auto entity = world.createEntity();
+        auto entity2 = world.createEntity();
+        auto entity3 = world.createEntity();
         auto &hp1Comp = world.addComponentToEntity(entity, hp1 {hps});
         auto &hp2Comp = world.addComponentToEntity(entity, hp2 {hps});
+        auto &hp1Comp2 = world.addComponentToEntity(entity3, hp1 {hps});
+        auto &hp2Comp2 = world.addComponentToEntity(entity3, hp2 {hps});
+        auto &hp2Comp3 = world.addComponentToEntity(entity2, hp2 {hps});
 
         world.runSystems();
         REQUIRE(hp1Comp.hp == hps - 1);
-        REQUIRE(hp2Comp.hp == hps - 2);
+        REQUIRE(hp2Comp.maxHp == hps - 2);
+        REQUIRE(hp1Comp2.hp == hps - 1);
+        REQUIRE(hp2Comp2.maxHp == hps - 2);
+        REQUIRE(hp2Comp3.maxHp == hps);
+        auto secondSystem = std::make_pair<std::string, std::unique_ptr<Engine::Core::System>>(
+            "MySystemClass", std::make_unique<MySystemClass<hp1, hp2>>(world));
+        world.addSystem(secondSystem);
+        world.runSystems();
+        REQUIRE(hp1Comp.hp == hps - 3);
+        REQUIRE(hp2Comp.maxHp == hps - 6);
+        REQUIRE(hp1Comp2.hp == hps - 3);
+        REQUIRE(hp2Comp2.maxHp == hps - 6);
+        REQUIRE(hp2Comp3.maxHp == hps);
+        world.removeSystem(MySystem.first);
+        world.runSystems();
+        REQUIRE(hp1Comp.hp == hps - 4);
+        REQUIRE(hp2Comp.maxHp == hps - 8);
+        REQUIRE(hp1Comp2.hp == hps - 4);
+        REQUIRE(hp2Comp2.maxHp == hps - 8);
+        REQUIRE(hp2Comp3.maxHp == hps);
     }
 }

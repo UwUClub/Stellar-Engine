@@ -7,6 +7,7 @@
 
 #include "World.hpp"
 #include <algorithm>
+#include <cstddef>
 #include <spdlog/spdlog.h>
 
 namespace Engine::Core {
@@ -46,18 +47,13 @@ namespace Engine::Core {
 
     void World::runSystems()
     {
-        for (std::size_t idx = 0; idx < _nextId; idx++) {
-            for (auto &system : _systems) {
-                auto time = system.second.second.getElapsedTime();
-                system.second.first(*this, time, idx);
-            }
+        for (auto &system : _systems) {
+            system.second->update();
         }
     }
 
-    void World::init()
+    std::size_t World::getCurrentId() const
     {
-        for (auto &system : _systems) {
-            system.second.second.restart();
-        }
+        return _nextId;
     }
 } // namespace Engine::Core
