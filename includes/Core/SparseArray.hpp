@@ -11,7 +11,6 @@
 #include "Exception.hpp"
 
 namespace Engine::Core {
-
     DEFINE_EXCEPTION(SparseArrayException);
     DEFINE_EXCEPTION_FROM(SparseArrayExceptionOutOfRange, SparseArrayException);
     DEFINE_EXCEPTION_FROM(SparseArrayExceptionEmpty, SparseArrayException);
