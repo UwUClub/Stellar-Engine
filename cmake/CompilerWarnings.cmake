@@ -47,7 +47,7 @@ function(
         # catch hard to track down memory errors
         -Wold-style-cast # warn for c-style casts
         -Wcast-align # warn for potential performance problem casts
-        -Wunused # warn on anything being unused
+        #-Wunused # warn on anything being unused
         -Woverloaded-virtual # warn if you overload (not override) a virtual function
         -Wpedantic # warn if non-standard C++ is used
         -Wconversion # warn on type conversions that may lose data
@@ -74,7 +74,7 @@ function(
     set(CUDA_WARNINGS
         -Wall
         -Wextra
-        -Wunused
+        #-Wunused
         -Wconversion
         -Wshadow
         # TODO add more Cuda warnings
