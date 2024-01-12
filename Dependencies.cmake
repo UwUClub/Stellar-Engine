@@ -26,7 +26,7 @@ function(patatocs_setup_dependencies)
     endif()
 
     if(NOT TARGET Boost::boost AND NOT Boost_FOUND)
-        cpmaddpackage("gh:boostorg/boost@1.78.0")
+        cpmaddpackage("gh:boostorg/boost@1.84.0")
     endif()
 
 endfunction()
