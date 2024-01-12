@@ -32,7 +32,7 @@ namespace Engine::Core {
             using optComponent = std::optional<Component>;
             using optCompRef = optComponent &;
             using vectArray = std::vector<optComponent>;
-            using vectIndex = vectArray::size_type;
+            using vectIndex = typename vectArray::size_type;
             using iterator = typename vectArray::iterator;
             using constIterator = typename vectArray::const_iterator;
 
