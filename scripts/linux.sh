@@ -16,4 +16,6 @@ else
 fi
 
 # install packages
+echo "Installing packages..."
+echo $package_manager
 sudo $package_manager $no_confirm git boost spdlog catch2
