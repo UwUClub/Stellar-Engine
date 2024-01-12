@@ -26,7 +26,21 @@ function(patatocs_setup_dependencies)
     endif()
 
     if(NOT TARGET Boost::boost AND NOT Boost_FOUND)
-        cpmaddpackage("gh:boostorg/boost@1.84.0")
+        set(BOOST_VERSION "1.84.0")
+        set(BOOST_LIBS system serialization align assert config core static_assert throw_exception array bind chrono integer move mpl predef asio ratio type_traits typeof utility coroutine date_time function regex smart_ptr preprocessor io uuid)
+        set(BOOST_INCLUDE_LIBRARIES ${BOOST_LIBS})
+
+        FetchContent_Declare(
+            Boost
+            URL https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}.7z
+            USES_TERMINAL_DOWNLOAD TRUE
+            GIT_PROGRESS TRUE
+            DOWNLOAD_NO_EXTRACT FALSE
+        )
+        set(Boost_USE_STATIC_LIBS ON)
+        set(Boost_USE_MULTITHREADED ON)
+        set(Boost_USE_STATIC_RUNTIME OFF)
+        FetchContent_MakeAvailable(Boost)
     endif()
 
 endfunction()
