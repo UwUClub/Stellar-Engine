@@ -2,9 +2,9 @@
 
 # get package manager
 if [ -x "$(command -v apt-get)" ]; then
-    apt-get install -y libboost-all-dev libspdlog-dev libcatch2-dev
+    sudo apt-get install -y libboost-all-dev libspdlog-dev libcatch2-dev
 elif [ -x "$(command -v pacman)" ]; then
-    pacman -S --noconfirm git boost spdlog catch2
+    sudo pacman -S --noconfirm git boost spdlog catch2
 else
     echo "No package manager found. Exiting."
     exit 1
