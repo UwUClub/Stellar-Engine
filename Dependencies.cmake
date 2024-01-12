@@ -17,15 +17,15 @@ function(patatocs_setup_dependencies)
     # For each dependency, see if it's
     # already been provided to us by a parent project
 
-    if(NOT TARGET Catch2::Catch2WithMain AND Catch2_FOUND EQUAL 0)
+    if(NOT TARGET Catch2::Catch2WithMain AND NOT Catch2_FOUND)
         cpmaddpackage("gh:catchorg/Catch2@3.3.2")
     endif()
 
-    if(NOT TARGET spdlog::spdlog AND spdlog_FOUND EQUAL 0)
+    if(NOT TARGET spdlog::spdlog AND NOT spdlog_FOUND)
         cpmaddpackage("gh:gabime/spdlog@1.12.0")
     endif()
 
-    if(NOT TARGET Boost::boost AND Boost_FOUND EQUAL FALSE)
+    if(NOT TARGET Boost::boost AND NOT Boost_FOUND)
         cpmaddpackage("gh:boostorg/boost@1.78.0")
     endif()
 
