@@ -34,14 +34,14 @@ namespace Engine::Core {
             using containerMap = boost::container::flat_map<std::type_index, container>;
             using idsContainer = std::vector<id>;
             using systemFunc = std::function<void(World &, double deltaTime, id)>;
-            using systems = boost::container::flat_map<std::string, systemFunc>;
+            using systemTimed = std::pair<systemFunc, Clock>;
+            using systems = boost::container::flat_map<std::string, systemTimed>;
 
         protected:
             containerMap _components;
             idsContainer _ids;
             std::size_t _nextId = 0;
             systems _systems;
-            Clock _clock;
 
         public:
 #pragma region constructors / destructors
@@ -234,9 +234,11 @@ namespace Engine::Core {
                     throw WorldExceptionSystemAlreadyRegistered("System already registered");
                 }
 
-                _systems[aName] = ([this, func](World &aWorld, double deltaTime, std::size_t aIndex) {
-                    callSystem<Components...>(func, aIndex, aWorld, deltaTime);
-                });
+                _systems[aName] = std::make_pair(
+                    [this, func](World &aWorld, double deltaTime, std::size_t aIndex) {
+                        callSystem<Components...>(func, aIndex, aWorld, deltaTime);
+                    },
+                    Clock());
             }
 
             /**

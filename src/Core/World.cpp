@@ -46,17 +46,18 @@ namespace Engine::Core {
 
     void World::runSystems()
     {
-        auto time = _clock.restart();
-
         for (std::size_t idx = 0; idx < _nextId; idx++) {
             for (auto &system : _systems) {
-                system.second(*this, time, idx);
+                auto time = system.second.second.getElapsedTime();
+                system.second.first(*this, time, idx);
             }
         }
     }
 
     void World::init()
     {
-        _clock.restart();
+        for (auto &system : _systems) {
+            system.second.second.restart();
+        }
     }
 } // namespace Engine::Core

@@ -5,7 +5,13 @@
 namespace Engine {
     class Clock
     {
+        protected:
+            std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime {
+                std::chrono::high_resolution_clock::now()};
+            std::chrono::duration<double> _delta {std::chrono::duration<double>(0)};
+
         public:
+#pragma region constructor/destructor
             Clock() = default;
             ~Clock() = default;
 
@@ -14,6 +20,9 @@ namespace Engine {
 
             Clock(Clock &&other) noexcept = default;
             Clock &operator=(Clock &&other) noexcept = default;
+#pragma endregion constructor / destructor
+
+#pragma region methods
 
             /**
              * @brief Get the time elapsed since the last call to restart
@@ -28,11 +37,7 @@ namespace Engine {
              * @return the time elapsed since the last call to restart
              */
             double restart();
-
-        protected:
-            std::chrono::time_point<std::chrono::high_resolution_clock> _lastTime {
-                std::chrono::high_resolution_clock::now()};
-            std::chrono::duration<double> _delta {std::chrono::duration<double>(0)};
+#pragma endregion methods
     };
 } // namespace Engine
 

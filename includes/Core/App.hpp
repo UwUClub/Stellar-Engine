@@ -25,6 +25,7 @@ namespace Engine {
             Key _currentWorld;
 
         public:
+#pragma region constructors / destructors
             App() = default;
             ~App() = default;
 
@@ -33,7 +34,9 @@ namespace Engine {
 
             App(App &&other) noexcept = delete;
             App &operator=(App &&other) noexcept = delete;
+#pragma endregion constructors / destructors
 
+#pragma region operators
             world &operator[](const Key &aKey)
             {
                 if (_worlds.find(aKey) == _worlds.end()) {
@@ -41,7 +44,9 @@ namespace Engine {
                 }
                 return _worlds[aKey];
             }
+#pragma endregion operators
 
+#pragma region methods
             /**
              * @brief Add a level to the app
              *
@@ -126,6 +131,7 @@ namespace Engine {
                 }
                 _currentWorld = key;
             }
+#pragma endregion methods
     };
 } // namespace Engine
 
