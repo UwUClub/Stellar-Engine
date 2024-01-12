@@ -25,7 +25,7 @@ function(patatocs_setup_dependencies)
         cpmaddpackage("gh:gabime/spdlog@1.12.0")
     endif()
 
-    if(NOT TARGET Boost::boost AND Boost_FOUND EQUAL 0)
+    if(NOT TARGET Boost::boost AND Boost_FOUND EQUAL FALSE)
         cpmaddpackage("gh:boostorg/boost@1.78.0")
     endif()
 
