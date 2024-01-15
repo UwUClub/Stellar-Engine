@@ -91,16 +91,11 @@ class MySystemClass : public Engine::Core::System
         std::reference_wrapper<Engine::Core::World> _world;
         Engine::Clock _clock;
 
-        void updateSystem(Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t idx, hp1 &hp1Comp,
+        void updateSystem(Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &hp1Comp,
                           hp2 &hp2Comp)
         {
-            std::cout << "Update system class"
-                      << "\n";
             hp1Comp.hp--;
-            std::cout << hp1Comp.hp << '\n';
             hp2Comp.maxHp -= 2;
-            std::cout << hp2Comp.maxHp << '\n';
-            std::cout << "Idx " << idx << "\n";
         }
 };
 
@@ -109,14 +104,9 @@ TEST_CASE("World", "[World]")
     Engine::Core::World world;
     auto MySystem = Engine::Core::createSystem<hp1, hp2>(
         world, "MySystem",
-        [](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t idx, hp1 &cop1, hp2 &cop2) {
-            std::cout << "Update system"
-                      << "\n";
+        [](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &cop1, hp2 &cop2) {
             cop1.hp--;
-            std::cout << cop1.hp << "\n";
             cop2.maxHp -= 2;
-            std::cout << cop2.maxHp << "\n";
-            std::cout << "Idx " << idx << "\n";
         });
 
     SECTION("Create an entity")
@@ -140,8 +130,7 @@ TEST_CASE("World", "[World]")
     {
         constexpr int hps = 10;
 
-        world.registerComponent<hp1>();
-        world.registerComponent<hp2>();
+        world.registerComponents<hp1, hp2>();
         world.addSystem(MySystem);
 
         auto entity = world.createEntity();

@@ -15,7 +15,9 @@ namespace Engine::Core {
             System(const System &) = default;
             System(System &&) = default;
 
-        protected:
+        public:
+            bool _isActivated = true;
+
         private:
     };
 } // namespace Engine::Core

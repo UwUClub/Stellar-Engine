@@ -47,6 +47,14 @@ endif()
 
 target_include_directories(tests PRIVATE ../includes)
 
+set_target_properties(tests
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "../../"
+    LIBRARY_OUTPUT_DIRECTORY "../../"
+    ARCHIVE_OUTPUT_DIRECTORY "../../"
+)
+
+
 # automatically discover tests that are defined in catch based test files you can modify the unittests. Set TEST_PREFIX
 # to whatever you want, or use different for different binaries
 catch_discover_tests(

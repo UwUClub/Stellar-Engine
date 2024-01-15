@@ -8,6 +8,8 @@ CMakeCache.txt
 libpatat*
 patat*
 log.txt
+*gcno
+tests
 
 # User spesific settings
 CMakeUserPresets.json
