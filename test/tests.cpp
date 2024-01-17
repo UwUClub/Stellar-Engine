@@ -67,8 +67,7 @@ class MySystemClass : public Engine::Core::System
 {
     public:
         explicit MySystemClass(Engine::Core::World &world)
-            : Engine::Core::System(),
-              _world(world)
+            : Engine::Core::System(world)
         {}
 
         MySystemClass(const MySystemClass &) = default;
@@ -79,7 +78,7 @@ class MySystemClass : public Engine::Core::System
 
         void update() override
         {
-            _world.get().query<Components...>().forEach(
+            _world.get().template query<Components...>().forEach(
                 _clock.getElapsedTime(), [this](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t idx,
                                                 Components &...components) {
                     this->updateSystem(_world.get(), _clock.getElapsedTime(), idx, components...);
@@ -88,9 +87,6 @@ class MySystemClass : public Engine::Core::System
         }
 
     private:
-        std::reference_wrapper<Engine::Core::World> _world;
-        Engine::Clock _clock;
-
         void updateSystem(Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &hp1Comp,
                           hp2 &hp2Comp)
         {
@@ -164,5 +160,32 @@ TEST_CASE("World", "[World]")
         REQUIRE(hp1Comp2.hp == hps - 4);
         REQUIRE(hp2Comp2.maxHp == hps - 8);
         REQUIRE(hp2Comp3.maxHp == hps);
+    }
+}
+
+TEST_CASE("Query")
+{
+    Engine::Core::World world;
+    constexpr int hps = 10;
+
+    struct Player
+    {};
+
+    SECTION("Add a component to an entity")
+    {
+        world.registerComponents<hp1, hp2, Player>();
+
+        world.createEntity();
+        world.createEntity();
+
+        world.addComponentToEntity(0, hp1 {hps});
+        world.addComponentToEntity(1, hp1 {hps});
+        world.addComponentToEntity(0, hp2 {hps});
+        world.addComponentToEntity(1, hp2 {hps});
+        world.addComponentToEntity(0, Player {});
+
+        auto query = world.query<hp1, hp2, Player>().getAllEntities();
+        REQUIRE(query.size() == 1);
+        REQUIRE(query[0] == 0);
     }
 }

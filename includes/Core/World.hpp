@@ -46,6 +46,9 @@ namespace Engine::Core {
             template<typename... Components>
             class Query
             {
+                private:
+                    std::reference_wrapper<Core::World> _world;
+
                 public:
                     explicit Query(Core::World &world)
                         : _world(world)
@@ -62,8 +65,34 @@ namespace Engine::Core {
                         }
                     }
 
-                private:
-                    std::reference_wrapper<Core::World> _world;
+                    auto getAllEntities()
+                    {
+                        std::vector<std::size_t> entities;
+
+                        for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
+                            if (_world.get().hasComponents<Components...>(idx)) {
+                                entities.emplace_back(idx);
+                            }
+                        }
+                        return entities;
+                    }
+
+                    auto getAll()
+                    {
+                        std::vector<std::tuple<std::size_t, Components &...>> entities;
+
+                        for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
+                            if (_world.get().hasComponents<Components...>(idx)) {
+                                entities.emplace_back(idx, _world.get().getComponent<Components>().get(idx)...);
+                            }
+                        }
+                        return entities;
+                    }
+
+                    auto getComponentsOfEntity(std::size_t idx)
+                    {
+                        return std::make_tuple(_world.get().getComponent<Components>().get(idx)...);
+                    }
             };
 
         public:

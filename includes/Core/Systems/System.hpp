@@ -1,11 +1,23 @@
 #ifndef SYSTEM_HPP_
 #define SYSTEM_HPP_
-
+#include <functional>
+#include "Core/Clock.hpp"
 namespace Engine::Core {
+    class World;
+
     class System
     {
         public:
-            System() = default;
+            bool _isActivated = true;
+
+        protected:
+            std::reference_wrapper<Core::World> _world;
+            Clock _clock;
+
+        public:
+            explicit System(Core::World &aWorld)
+                : _world(aWorld)
+            {}
             virtual ~System() = default;
             virtual void update() = 0;
 
@@ -14,11 +26,6 @@ namespace Engine::Core {
 
             System(const System &) = default;
             System(System &&) = default;
-
-        public:
-            bool _isActivated = true;
-
-        private:
     };
 } // namespace Engine::Core
 

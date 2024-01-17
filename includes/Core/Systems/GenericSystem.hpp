@@ -3,7 +3,6 @@
 
 #include <functional>
 #include <utility>
-#include "Core/Clock.hpp"
 #include "Core/World.hpp"
 #include "System.hpp"
 
@@ -11,22 +10,21 @@ namespace Engine::Core {
     template<typename Func, typename... Components>
     class GenericSystem : public System
     {
+        private:
+            Func _updateFunc;
+
         public:
             GenericSystem(Core::World &world, Func updateFunc)
-                : _world(world),
+                : System(world),
                   _updateFunc(updateFunc)
             {}
 
             void update() override
             {
                 double deltaTime = _clock.getElapsedTime();
-                _world.get().query<Components...>().forEach(deltaTime, _updateFunc);
-            }
 
-        private:
-            std::reference_wrapper<Core::World> _world;
-            Func _updateFunc;
-            Clock _clock;
+                _world.get().template query<Components...>().forEach(deltaTime, _updateFunc);
+            }
     };
 
     template<typename... Components, typename Func>
@@ -36,7 +34,6 @@ namespace Engine::Core {
         return std::pair<std::string, std::unique_ptr<System>>(
             std::make_pair(aName, std::make_unique<GenericSystem<Func, Components...>>(aWorld, aUpdateFunc)));
     }
-
 } // namespace Engine::Core
 
 #endif /* !GENERICSYSTEM_HPP_ */
