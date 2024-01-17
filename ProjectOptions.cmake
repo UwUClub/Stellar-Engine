@@ -5,7 +5,7 @@ include(CheckCXXCompilerFlag)
 
 macro(patatocs_supports_sanitizers)
   if((CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES ".*GNU.*") AND NOT WIN32)
-    set(SUPPORTS_UBSAN ON)
+    set(SUPPORTS_UBSAN OFF)
   else()
     set(SUPPORTS_UBSAN OFF)
   endif()
@@ -13,13 +13,13 @@ macro(patatocs_supports_sanitizers)
   if((CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES ".*GNU.*") AND WIN32)
     set(SUPPORTS_ASAN OFF)
   else()
-    set(SUPPORTS_ASAN ON)
+    set(SUPPORTS_ASAN OFF)
   endif()
 endmacro()
 
 macro(patatocs_setup_options)
-  option(patatocs_ENABLE_HARDENING "Enable hardening" ON)
-  option(patatocs_ENABLE_COVERAGE "Enable coverage reporting" ON)
+  option(patatocs_ENABLE_HARDENING "Enable hardening" OFF)
+  option(patatocs_ENABLE_COVERAGE "Enable coverage reporting" OFF)
   cmake_dependent_option(
     patatocs_ENABLE_GLOBAL_HARDENING
     "Attempt to push hardening options to built dependencies"

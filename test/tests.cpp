@@ -98,12 +98,6 @@ class MySystemClass : public Engine::Core::System
 TEST_CASE("World", "[World]")
 {
     Engine::Core::World world;
-    auto MySystem = Engine::Core::createSystem<hp1, hp2>(
-        world, "MySystem",
-        [](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &cop1, hp2 &cop2) {
-            cop1.hp--;
-            cop2.maxHp -= 2;
-        });
 
     SECTION("Create an entity")
     {
@@ -125,6 +119,12 @@ TEST_CASE("World", "[World]")
     SECTION("Run a system")
     {
         constexpr int hps = 10;
+        auto MySystem = Engine::Core::createSystem<hp1, hp2>(
+            world, "MySystem",
+            [](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &cop1, hp2 &cop2) {
+                cop1.hp--;
+                cop2.maxHp -= 2;
+            });
 
         world.registerComponents<hp1, hp2>();
         world.addSystem(MySystem);
@@ -171,7 +171,7 @@ TEST_CASE("Query")
     struct Player
     {};
 
-    SECTION("Add a component to an entity")
+    SECTION("getAllEntities")
     {
         world.registerComponents<hp1, hp2, Player>();
 
@@ -187,5 +187,48 @@ TEST_CASE("Query")
         auto query = world.query<hp1, hp2, Player>().getAllEntities();
         REQUIRE(query.size() == 1);
         REQUIRE(query[0] == 0);
+    }
+
+    SECTION("getAllEntities 2")
+    {
+        world.registerComponents<hp1, hp2, Player>();
+
+        world.createEntity();
+        world.createEntity();
+
+        world.addComponentToEntity(0, hp1 {hps});
+        world.addComponentToEntity(1, hp1 {hps});
+        world.addComponentToEntity(0, hp2 {hps});
+        world.addComponentToEntity(1, hp2 {hps});
+        world.addComponentToEntity(0, Player {});
+        world.addComponentToEntity(1, Player {});
+
+        auto query = world.query<hp1, hp2, Player>().getAllEntities();
+        REQUIRE(query.size() == 2);
+        REQUIRE(query[0] == 0);
+        REQUIRE(query[1] == 1);
+    }
+
+    SECTION("getAllEntities 3")
+    {
+        world.registerComponents<hp1, hp2, Player>();
+
+        world.createEntity();
+        world.createEntity();
+        world.createEntity();
+
+        world.addComponentToEntity(0, hp1 {hps});
+        world.addComponentToEntity(1, hp1 {hps});
+        world.addComponentToEntity(2, hp1 {hps});
+        world.addComponentToEntity(0, hp2 {hps});
+        world.addComponentToEntity(1, hp2 {hps});
+        world.addComponentToEntity(2, hp2 {hps});
+        world.addComponentToEntity(0, Player {});
+        world.addComponentToEntity(2, Player {});
+
+        auto query = world.query<hp1, hp2, Player>().getAllEntities();
+        REQUIRE(query.size() == 2);
+        REQUIRE(query[0] == 0);
+        REQUIRE(query[1] == 2);
     }
 }
