@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <mutex>
 #include <vector>
+#include "Event.hpp"
 
 namespace Engine::Event {
 
@@ -12,7 +13,7 @@ namespace Engine::Event {
      *
      * @tparam Event the type of event to handle
      */
-    template<class Event>
+    template<EventConcept Event>
     class EventHandler
     {
         public:

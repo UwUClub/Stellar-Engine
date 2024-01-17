@@ -9,10 +9,12 @@
 #include <typeindex>
 #include <utility>
 #include <vector>
+#include "Components/SparseArray.hpp"
+#include "Core/Components/Component.hpp"
 #include "Exception.hpp"
-#include "SparseArray.hpp"
 #include "Systems/System.hpp"
 #include <boost/container/flat_map.hpp>
+
 namespace Engine::Core {
     DEFINE_EXCEPTION(WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentAlreadyRegistered, WorldException);
@@ -43,7 +45,7 @@ namespace Engine::Core {
             std::size_t _nextId = 0;
             systems _systems;
 
-            template<typename... Components>
+            template<ComponentConcept... Components>
             class Query
             {
                 private:
@@ -109,7 +111,7 @@ namespace Engine::Core {
 
 #pragma region methods
 
-            template<typename... Components>
+            template<ComponentConcept... Components>
             Query<Components...> query()
             {
                 return Query<Components...>(*this);
@@ -121,7 +123,7 @@ namespace Engine::Core {
              * @tparam Component Type of the component
              * @return SparseArray<Component>& Reference to the component SparseArray
              */
-            template<typename Component>
+            template<ComponentConcept Component>
             SparseArray<Component> &registerComponent()
             {
                 auto typeIndex = std::type_index(typeid(Component));
@@ -149,7 +151,7 @@ namespace Engine::Core {
              *
              * @tparam Components The components to add
              */
-            template<typename... Components>
+            template<ComponentConcept... Components>
             void registerComponents()
             {
                 (registerComponent<Components>(), ...);
@@ -161,7 +163,7 @@ namespace Engine::Core {
              * @tparam Component The type of the component
              * @return SparseArray<Component>& the SparseArray of the component
              */
-            template<typename Component>
+            template<ComponentConcept Component>
             SparseArray<Component> &getComponent()
             {
                 auto typeIndex = std::type_index(typeid(Component));
@@ -178,7 +180,7 @@ namespace Engine::Core {
              * @tparam Component The type of the component
              * @return SparseArray<Component>& the SparseArray of the component
              */
-            template<typename Component>
+            template<ComponentConcept Component>
             SparseArray<Component> const &getComponent() const
             {
                 auto typeIndex = std::type_index(typeid(Component));
@@ -197,7 +199,7 @@ namespace Engine::Core {
              * @return true if the entity has all the components
              * @return false if the entity doesn't have all the components
              */
-            template<typename... Components>
+            template<ComponentConcept... Components>
             [[nodiscard]] bool hasComponents(std::size_t aIndex) const
             {
                 return (... && getComponent<Components>().has(aIndex));
@@ -208,7 +210,7 @@ namespace Engine::Core {
              *
              * @tparam Component The type of the component
              */
-            template<typename Component>
+            template<ComponentConcept Component>
             void removeComponent()
             {
                 auto typeIndex = std::type_index(typeid(Component));
@@ -227,7 +229,7 @@ namespace Engine::Core {
              * @param aComponent The component to add
              * @return Component& The component added
              */
-            template<typename Component>
+            template<ComponentConcept Component>
             Component &addComponentToEntity(std::size_t aIndex, Component &&aComponent)
             {
                 try {
@@ -249,7 +251,7 @@ namespace Engine::Core {
              * @param aArgs The arguments to pass to the component constructor
              * @return Component& The component added
              */
-            template<typename Component, typename... Args>
+            template<ComponentConcept Component, typename... Args>
             Component &emplaceComponentToEntity(std::size_t aIndex, Args &&...aArgs)
             {
                 try {
@@ -268,7 +270,7 @@ namespace Engine::Core {
              * @tparam Component The type of the component to remove
              * @param aIndex The index of the entity
              */
-            template<typename Component>
+            template<ComponentConcept Component>
             void removeComponentFromEntity(std::size_t aIndex)
             {
                 try {

@@ -7,6 +7,7 @@
 #include <typeindex>
 #include <utility>
 #include <vector>
+#include "Event.hpp"
 #include "EventHandler.hpp"
 #include "Exception.hpp"
 #include <boost/container/flat_map.hpp>
@@ -83,7 +84,7 @@ namespace Engine::Event {
              * @param aEvent The event to push.
              * @tparam Event The type of the event.
              */
-            template<typename Event>
+            template<EventConcept Event>
             void pushEvent(const Event &aEvent)
             {
                 try {
@@ -100,7 +101,7 @@ namespace Engine::Event {
              * @tparam Event The type of the event.
              * @return std::vector<Event>& The list of events.
              */
-            template<typename Event>
+            template<EventConcept Event>
             std::vector<Event> &getEventsByType()
             {
                 try {
@@ -116,7 +117,7 @@ namespace Engine::Event {
              * @brief Clear all the events of the types that aren't in the list
              * @tparam EventList The list of events to keep.
              */
-            template<typename... EventList>
+            template<EventConcept... EventList>
             void keepEventsAndClear()
             {
                 std::vector<std::type_index> eventIndexList = {std::type_index(typeid(EventList))...};
@@ -134,7 +135,7 @@ namespace Engine::Event {
              * @tparam Event The type of the event.
              *
              */
-            template<typename Event>
+            template<EventConcept Event>
             void removeEvent(const std::size_t aIndex)
             {
                 auto eventIndex = std::type_index(typeid(Event));
@@ -157,7 +158,7 @@ namespace Engine::Event {
              * @tparam Event The type of the event.
              *
              */
-            template<typename Event>
+            template<EventConcept Event>
             void removeEvent(std::vector<size_t> aIndexes)
             {
                 auto eventIndex = std::type_index(typeid(Event));
@@ -178,7 +179,7 @@ namespace Engine::Event {
                 }
             }
 
-            template<typename Event>
+            template<EventConcept Event>
             void initEventHandler()
             {
                 auto eventTypeIndex = std::type_index(typeid(Event));
@@ -193,7 +194,7 @@ namespace Engine::Event {
                 });
             }
 
-            template<typename... EventList>
+            template<EventConcept... EventList>
             void initEventHandlers()
             {
                 (initEventHandler<EventList>(), ...);
@@ -206,7 +207,7 @@ namespace Engine::Event {
              * @tparam Event The type of the event to get the handler
              * @return EventHandler<Event>& The handler of the event.
              */
-            template<typename Event>
+            template<EventConcept Event>
             EventHandler<Event> &getHandler()
             {
                 auto eventTypeIndex = std::type_index(typeid(Event));

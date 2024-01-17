@@ -3,11 +3,12 @@
 
 #include <functional>
 #include <utility>
+#include "Core/Components/Component.hpp"
 #include "Core/World.hpp"
 #include "System.hpp"
 
 namespace Engine::Core {
-    template<typename Func, typename... Components>
+    template<typename Func, ComponentConcept... Components>
     class GenericSystem : public System
     {
         private:
@@ -27,7 +28,7 @@ namespace Engine::Core {
             }
     };
 
-    template<typename... Components, typename Func>
+    template<ComponentConcept... Components, typename Func>
     std::pair<std::string, std::unique_ptr<System>> createSystem(World &aWorld, const std::string &aName,
                                                                  Func aUpdateFunc)
     {

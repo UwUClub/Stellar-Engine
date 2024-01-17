@@ -8,6 +8,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include "Component.hpp"
 #include "Exception.hpp"
 
 namespace Engine::Core {
@@ -22,7 +23,7 @@ namespace Engine::Core {
      *
      * @tparam Component The type of the components to store
      */
-    template<typename Component>
+    template<ComponentConcept Component>
     class SparseArray final
     {
         public:

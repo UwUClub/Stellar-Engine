@@ -3,9 +3,6 @@
 #include <functional>
 #include <iostream>
 #include <memory>
-#include "Core/Systems/GenericSystem.hpp"
-#include "Core/Systems/System.hpp"
-#include "Core/World.hpp"
 #include "ECS.hpp"
 #include <catch2/catch_test_macros.hpp>
 
@@ -52,13 +49,21 @@ TEST_CASE("App", "[App]")
     }
 }
 
-struct hp1
+struct hp1 : public Engine::Component
 {
+    public:
+        explicit hp1(int aHp)
+            : hp(aHp)
+        {}
         int hp;
 };
 
-struct hp2
+struct hp2 : public Engine::Component
 {
+    public:
+        explicit hp2(int aHp)
+            : maxHp(aHp)
+        {}
         int maxHp;
 };
 
@@ -168,7 +173,7 @@ TEST_CASE("Query")
     Engine::Core::World world;
     constexpr int hps = 10;
 
-    struct Player
+    struct Player : public Engine::Component
     {};
 
     SECTION("getAllEntities")

@@ -2,6 +2,7 @@
 #define APP_HPP_
 
 #include <memory>
+#include "Core/Events/Event.hpp"
 #include "Exception.hpp"
 #include "World.hpp"
 #include <boost/container/flat_map.hpp>
@@ -13,7 +14,10 @@ namespace Engine {
     DEFINE_EXCEPTION_FROM(AppExceptionKeyNotFound, AppException);
     DEFINE_EXCEPTION_FROM(AppExceptionKeyAlreadyExists, AppException);
 
-    template<typename Key = std::size_t>
+    template<typename T> // must not be a component or a system or an event
+    concept KeyConcept = !ComponentConcept<T> && !Event::EventConcept<T>;
+
+    template<KeyConcept Key = std::size_t>
     class App
     {
         public:
